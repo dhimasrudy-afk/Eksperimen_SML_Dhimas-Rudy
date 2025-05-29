@@ -1,0 +1,39 @@
+name: Automatic Data Preprocessing # Nama workflow Anda
+
+on: workflow_dispatch # Trigger untuk menjalankan workflow
+
+permissions:
+  contents: write # ✅ This allows the workflow to push commits
+
+jobs:
+  preprocess-data: # Nama job
+    runs-on: ubuntu-latest # Menentukan sistem operasi runner
+
+    steps:
+      - name: Checkout repository # Langkah untuk mengambil kode dari repository
+        uses: actions/checkout@v4 # Menggunakan action standar untuk checkout
+
+      - name: Set up Python # Langkah untuk menyiapkan environment Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Sesuaikan dengan versi Python yang Anda gunakan
+          # cache: 'pip' # Opsional: untuk caching dependencies
+
+      - name: Install dependencies # Langkah untuk menginstal library yang dibutuhkan
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy # Tambahkan library lain jika ada
+
+      - name: Run preprocessing script # Langkah untuk menjalankan skrip Python Anda
+        run: |
+          python preprocessing/automate_Dhimas-Rudy.py
+
+      - name: Commit and push preprocessed data # Langkah untuk menyimpan hasil preprocessing kembali ke repository
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add preprocessing/dataset_preprocessing/debernardi_2020_preprocessed.csv # Pastikan path ini sesuai
+          git commit -m "Automated preprocessing: Update preprocessed dataset"
+          git push
+        env: # Environment variable jika token default tidak cukup (biasanya cukup)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
